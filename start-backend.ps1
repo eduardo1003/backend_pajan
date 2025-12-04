@@ -1,5 +1,5 @@
 # Script para iniciar el backend
-cd server
+cd backend
 $env:DATABASE_URL="postgresql://neondb_owner:npg_l8MrDoUvN2wH@ep-ancient-sun-ah950gup-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 $env:JWT_SECRET="super_secret_jwt_key_min_32_chars_for_production_change_this"
 $env:JWT_EXPIRES_IN="7d"

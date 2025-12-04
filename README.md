@@ -1,9 +1,38 @@
-<<<<<<< HEAD
 # GAD Paján - Participación Ciudadana
 
 Plataforma de participación ciudadana para el GAD Municipal de Paján. Una aplicación web responsiva que permite a los ciudadanos reportar incidentes, participar en eventos comunitarios y mantenerse informados sobre las actividades municipales.
 
-## Características
+## 📁 Estructura del Proyecto
+
+```
+apppp21/
+├── frontend/          # Aplicación React + Vite
+├── backend/           # API Express.js + Prisma
+├── android/           # Aplicación Android (Capacitor)
+└── README.md
+```
+
+## 🚀 Inicio Rápido
+
+### Backend
+
+```bash
+cd backend
+npm install
+# Crear .env con DATABASE_URL de Neon
+npm run dev
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+# Crear .env con VITE_API_URL
+npm run dev
+```
+
+## 📋 Características
 
 - 📱 **100% Responsivo**: Optimizado para PC, tablet y móvil
 - 🔄 **Navegación móvil**: Botón de retroceso funcional en dispositivos móviles
@@ -13,145 +42,41 @@ Plataforma de participación ciudadana para el GAD Municipal de Paján. Una apli
 - 🔐 **Sistema de roles**: Ciudadanos, administradores y personal de departamentos
 - 📱 **APK Android**: Aplicación nativa para dispositivos móviles
 
-## Tecnologías
+## 🛠️ Tecnologías
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **UI**: Tailwind CSS + shadcn/ui + Radix UI
-- **Backend**: Supabase
-- **Móvil**: Capacitor
-- **Mapas**: Mapbox GL
-- **Estado**: TanStack Query + React Hook Form
+### Frontend
+- React 18 + TypeScript + Vite
+- Tailwind CSS + shadcn/ui + Radix UI
+- TanStack Query + React Hook Form
+- Mapbox GL
 
-## Instalación
+### Backend
+- Express.js + TypeScript
+- Prisma ORM
+- PostgreSQL (Neon)
+- JWT Authentication
 
-```bash
-# Instalar dependencias
-npm install
+### Móvil
+- Capacitor
 
-# Configurar variables de entorno
-cp .env.example .env.local
-# Editar .env.local con tus credenciales de Supabase
-```
+## 📚 Documentación
 
-## Desarrollo
+- `frontend/ARCHIVOS_ENV.md` - Configuración de variables de entorno
+- `frontend/CONFIGURACION_PRODUCCION.md` - Configuración para producción
+- `backend/README.md` - Documentación del backend
+- `CREDENCIALES_ADMIN.md` - Credenciales de administrador
 
-```bash
-# Servidor de desarrollo
-npm run dev
+## 🔑 Credenciales de Administrador
 
-# Construir para producción
-npm run build
+Ver `CREDENCIALES_ADMIN.md` para las credenciales de acceso.
 
-# Vista previa de producción
-npm run preview
-```
+## 🚀 Despliegue
 
-## Generar APK para Android
+- **Frontend:** Vercel (https://app-pajan.vercel.app)
+- **Backend:** Render (https://app-pajan.onrender.com)
+- **Base de Datos:** Neon PostgreSQL
 
-### Prerequisitos
+## 📝 Licencia
 
-1. **Android Studio** instalado
-2. **Java Development Kit (JDK)** 11 o superior
-3. **Android SDK** configurado
-4. **Node.js** 18 o superior
+Este proyecto es propiedad del GAD Municipal de Paján.
 
-### Pasos para generar el APK
-
-1. **Construir la aplicación web**:
-   ```bash
-   npm run build
-   ```
-
-2. **Sincronizar con Capacitor**:
-   ```bash
-   npm run cap:sync
-   ```
-
-3. **Abrir en Android Studio**:
-   ```bash
-   npm run cap:open
-   ```
-
-4. **En Android Studio**:
-   - Selecciona "Build" → "Build Bundle(s) / APK(s)" → "Build APK(s)"
-   - O para desarrollo: "Run" → "Run 'app'"
-
-### Comandos útiles
-
-```bash
-# Construir y sincronizar
-npm run cap:build
-
-# Ejecutar en dispositivo Android (desarrollo)
-npm run android:dev
-
-# Construir APK de producción
-npm run android:build
-```
-
-### Configuración del APK
-
-El archivo `capacitor.config.ts` ya está configurado con:
-- **App ID**: `com.jipijapa.ciudadactiva`
-- **App Name**: `Jipijapa Ciudad Activa`
-- **Splash Screen** configurado
-- **Status Bar** optimizada
-- **Keyboard** responsivo
-
-## Estructura del Proyecto
-
-```
-src/
-├── components/          # Componentes reutilizables
-│   ├── ui/             # Componentes de UI (shadcn/ui)
-│   ├── Navbar.tsx      # Barra de navegación
-│   └── MobileNavigation.tsx # Navegación móvil
-├── hooks/              # Hooks personalizados
-│   ├── useAuth.tsx     # Autenticación
-│   └── useBackButton.tsx # Navegación móvil
-├── pages/              # Páginas de la aplicación
-│   ├── Dashboard.tsx   # Panel principal
-│   ├── admin/          # Páginas de administración
-│   └── department/     # Páginas de departamentos
-├── utils/              # Utilidades
-│   └── mobileUtils.ts  # Utilidades móviles
-└── integrations/       # Integraciones externas
-    └── supabase/       # Configuración de Supabase
-```
-
-## Responsividad
-
-La aplicación está optimizada para:
-- **Móvil**: 320px - 768px
-- **Tablet**: 768px - 1024px  
-- **Desktop**: 1024px+
-
-### Breakpoints utilizados:
-- `sm`: 640px
-- `md`: 768px
-- `lg`: 1024px
-- `xl`: 1280px
-
-## Navegación Móvil
-
-- ✅ Botón de retroceso físico funcional
-- ✅ Navegación con gestos
-- ✅ Menú hamburguesa responsivo
-- ✅ Prevención de zoom accidental
-- ✅ Viewport optimizado
-
-## Contribuir
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-=======
-# app_pajan
-aplicación móvil de lideres comunitarios 
->>>>>>> 1070128ad9679c0aee2e11502e5c88df012db0cb
