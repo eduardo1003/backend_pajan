@@ -13,7 +13,8 @@
     "prisma:studio": "prisma studio",
     "prisma:push": "prisma db push",
     "create-admin": "tsx src/scripts/create-admin.ts",
-    "create-user": "tsx src/scripts/create-user.ts"
+    "create-user": "tsx src/scripts/create-user.ts",
+    "list-users": "tsx src/scripts/list-users.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.19.0",

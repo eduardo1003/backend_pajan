@@ -1,16 +1,28 @@
 # 🔐 Credenciales de Administrador
 
-## ✅ Usuario Administrador Creado
+## ✅ Usuarios Administradores en la Base de Datos
 
-Se ha creado un usuario administrador en la base de datos Neon.
+Hay **2 usuarios administradores** creados en la base de datos Neon.
 
 ### 🔑 Credenciales de Acceso
 
+#### Administrador 1 (Recién Creado)
 ```
-Email: admin@gadpajan.gob.ec
-Contraseña: Admin123
-Nombre: Administrador Principal
-Rol: admin
+📧 Email: administrador@gadpajan.gob.ec
+🔑 Contraseña: Admin2024!
+👤 Nombre: Administrador del Sistema
+🔐 Rol: admin
+✅ Email verificado: Sí
+```
+
+#### Administrador 2 (Original)
+```
+📧 Email: admin@gadpajan.gob.ec
+🔑 Contraseña: 
+
+👤 Nombre: Administrador Principal
+🔐 Rol: admin
+✅ Email verificado: Sí
 ```
 
 ## 🚨 IMPORTANTE - Seguridad
