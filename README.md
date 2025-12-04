@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # GAD Paján - Participación Ciudadana
 
 Plataforma de participación ciudadana para el GAD Municipal de Paján. Una aplicación web responsiva que permite a los ciudadanos reportar incidentes, participar en eventos comunitarios y mantenerse informados sobre las actividades municipales.
@@ -150,3 +151,7 @@ La aplicación está optimizada para:
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+=======
+# app_pajan
+aplicación móvil de lideres comunitarios 
+>>>>>>> 1070128ad9679c0aee2e11502e5c88df012db0cb
