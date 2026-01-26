@@ -2,7 +2,6 @@ services:
   - type: web
     name: app-pajan-api
     runtime: node
-    rootDir: backend
     buildCommand: npm install && npm run build && npx prisma migrate deploy
     startCommand: npm start
     envVars:
