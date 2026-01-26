@@ -20,7 +20,7 @@
 
 **Build Command:**
 ```bash
-npm install && npm run build && npx prisma generate
+npm install && npm run build
 ```
 
 **Start Command:**
