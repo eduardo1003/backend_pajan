@@ -29,16 +29,16 @@ app.get('/api/test-db', async (req, res) => {
   try {
     await prisma.$connect();
     const userCount = await prisma.user.count();
-    res.json({ 
-      status: 'ok', 
+    res.json({
+      status: 'ok',
       message: 'Database connected successfully',
-      userCount 
+      userCount
     });
   } catch (error: any) {
-    res.status(500).json({ 
-      status: 'error', 
+    res.status(500).json({
+      status: 'error',
       message: 'Database connection failed',
-      error: error.message 
+      error: error.message
     });
   }
 });
@@ -51,6 +51,7 @@ import departmentRoutes from './routes/departments.js';
 import categoryRoutes from './routes/categories.js';
 import uploadRoutes from './routes/upload.js';
 import statsRoutes from './routes/stats.js';
+import barrioPresidentRoutes from './routes/barrioPresidents.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/incidents', incidentRoutes);
@@ -59,6 +60,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/barrio-presidents', barrioPresidentRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

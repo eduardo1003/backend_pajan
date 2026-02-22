@@ -143,3 +143,14 @@ model CategoryDepartmentMapping {
   @@map("category_department_mapping")
 }
 
+
+model BarrioPresident {
+  id        String   @id @default(uuid())
+  name      String
+  barrio    String
+  phone     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("barrio_presidents")
+}
