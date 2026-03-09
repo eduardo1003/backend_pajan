@@ -2,53 +2,55 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
-const router = express.Router();
-const prisma = new PrismaClient();
+const directivaBarriosRouter = express.Router();
+const dbConexion = new PrismaClient();
 
-// Get all barrio presidents
-router.get('/', async (req, res) => {
+/**
+ * CONTROLADORES DE GESTIÓN PARA PRESIDENTES DE BARRIO
+ */
+
+// Obtener listado completo de presidentes
+const listarPresidentesBarrio = async (peticion: express.Request, respuesta: express.Response) => {
     try {
-        const presidents = await prisma.barrioPresident.findMany({
+        const listado = await dbConexion.barrioPresident.findMany({
             orderBy: { barrio: 'asc' },
         });
-
-        res.json(presidents);
-    } catch (error: any) {
-        console.error('Get barrio presidents error:', error);
-        res.status(500).json({ error: error.message || 'Failed to get barrio presidents' });
+        respuesta.json(listado);
+    } catch (errorOperativo: any) {
+        console.error('Error al listar presidentes:', errorOperativo);
+        respuesta.status(500).json({ error: 'No se pudo recuperar la lista de presidentes' });
     }
-});
+};
 
-// Get single barrio president
-router.get('/:id', async (req, res) => {
+// Obtener detalles de un presidente específico por su ID
+const obtenerDetallePresidente = async (peticion: express.Request, respuesta: express.Response) => {
     try {
-        const { id } = req.params;
-
-        const president = await prisma.barrioPresident.findUnique({
+        const { id } = peticion.params;
+        const registro = await dbConexion.barrioPresident.findUnique({
             where: { id },
         });
 
-        if (!president) {
-            return res.status(404).json({ error: 'Barrio president not found' });
+        if (!registro) {
+            return respuesta.status(404).json({ error: 'Presidente de barrio no localizado' });
         }
 
-        res.json(president);
-    } catch (error: any) {
-        console.error('Get barrio president error:', error);
-        res.status(500).json({ error: error.message || 'Failed to get barrio president' });
+        respuesta.json(registro);
+    } catch (errorOperativo: any) {
+        console.error('Error al obtener presidente:', errorOperativo);
+        respuesta.status(500).json({ error: 'Error en la consulta del registro' });
     }
-});
+};
 
-// Create barrio president (admin only)
-router.post('/', authenticateToken, requireRole('admin'), async (req, res) => {
+// Registrar un nuevo presidente de barrio (Acceso Restringido: Administrador)
+const registrarPresidenteBarrio = async (peticion: express.Request, respuesta: express.Response) => {
     try {
-        const { name, barrio, phone } = req.body;
+        const { name, barrio, phone } = peticion.body;
 
         if (!name || !barrio) {
-            return res.status(400).json({ error: 'Name and barrio are required' });
+            return respuesta.status(400).json({ error: 'El nombre y el barrio son campos obligatorios' });
         }
 
-        const president = await prisma.barrioPresident.create({
+        const nuevoRegistro = await dbConexion.barrioPresident.create({
             data: {
                 name,
                 barrio,
@@ -56,49 +58,59 @@ router.post('/', authenticateToken, requireRole('admin'), async (req, res) => {
             },
         });
 
-        res.status(201).json(president);
-    } catch (error: any) {
-        console.error('Create barrio president error:', error);
-        res.status(500).json({ error: error.message || 'Failed to create barrio president' });
+        respuesta.status(201).json(nuevoRegistro);
+    } catch (errorOperativo: any) {
+        console.error('Error en creación de presidente:', errorOperativo);
+        respuesta.status(500).json({ error: 'Fallo al intentar registrar el nuevo presidente' });
     }
-});
+};
 
-// Update barrio president (admin only)
-router.put('/:id', authenticateToken, requireRole('admin'), async (req, res) => {
+// Actualizar información de un presidente existente
+const actualizarPresidenteBarrio = async (peticion: express.Request, respuesta: express.Response) => {
     try {
-        const { id } = req.params;
-        const { name, barrio, phone } = req.body;
+        const { id } = peticion.params;
+        const { name, barrio, phone } = peticion.body;
 
-        const president = await prisma.barrioPresident.update({
+        const actualizacion = await dbConexion.barrioPresident.update({
             where: { id },
             data: {
-                name: name !== undefined ? name : undefined,
-                barrio: barrio !== undefined ? barrio : undefined,
-                phone: phone !== undefined ? phone : undefined,
+                name: name ?? undefined,
+                barrio: barrio ?? undefined,
+                phone: phone ?? undefined,
             },
         });
 
-        res.json(president);
-    } catch (error: any) {
-        console.error('Update barrio president error:', error);
-        res.status(500).json({ error: error.message || 'Failed to update barrio president' });
+        respuesta.json(actualizacion);
+    } catch (errorOperativo: any) {
+        console.error('Error en actualización de presidente:', errorOperativo);
+        respuesta.status(500).json({ error: 'No se pudo procesar la actualización del registro' });
     }
-});
+};
 
-// Delete barrio president (admin only)
-router.delete('/:id', authenticateToken, requireRole('admin'), async (req, res) => {
+// Eliminar un registro de presidente de barrio
+const eliminarPresidenteBarrio = async (peticion: express.Request, respuesta: express.Response) => {
     try {
-        const { id } = req.params;
+        const { id } = peticion.params;
 
-        await prisma.barrioPresident.delete({
+        await dbConexion.barrioPresident.delete({
             where: { id },
         });
 
-        res.json({ message: 'Barrio president deleted successfully' });
-    } catch (error: any) {
-        console.error('Delete barrio president error:', error);
-        res.status(500).json({ error: error.message || 'Failed to delete barrio president' });
+        respuesta.json({ mensaje: 'Presidente de barrio removido exitosamente del sistema' });
+    } catch (errorOperativo: any) {
+        console.error('Error al eliminar presidente:', errorOperativo);
+        respuesta.status(500).json({ error: 'Fallo en la eliminación del registro solicitado' });
     }
-});
+};
 
-export default router;
+/**
+ * MAPEADO DE RUTAS HACIA CONTROLADORES
+ */
+directivaBarriosRouter.get('/', listarPresidentesBarrio);
+directivaBarriosRouter.get('/:id', obtenerDetallePresidente);
+directivaBarriosRouter.post('/', authenticateToken, requireRole('admin'), registrarPresidenteBarrio);
+directivaBarriosRouter.put('/:id', authenticateToken, requireRole('admin'), actualizarPresidenteBarrio);
+directivaBarriosRouter.delete('/:id', authenticateToken, requireRole('admin'), eliminarPresidenteBarrio);
+
+export default directivaBarriosRouter;
+

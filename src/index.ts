@@ -3,47 +3,57 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
-// Load environment variables
+/**
+ * Configuración inicial del servidor para el GAD Municipal de Paján.
+ * Cargamos las variables de entorno para asegurar la conectividad y seguridad.
+ */
 dotenv.config();
 
-const app = express();
-const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3001;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:8080';
+const pajanApi = express();
+const pajanDb = new PrismaClient();
+const PUERTO_SERVICIO = process.env.PORT || 3001;
+const ORIGEN_PERMITIDO = process.env.CORS_ORIGIN || 'http://localhost:8080';
 
-// Middleware
-app.use(cors({
-  origin: CORS_ORIGIN,
+// Configuración de Middlewares de Seguridad y Comunicación
+pajanApi.use(cors({
+  origin: ORIGEN_PERMITIDO,
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+pajanApi.use(express.json());
+pajanApi.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'API is running' });
+/**
+ * Punto de enlace para verificar la disponibilidad del sistema.
+ */
+pajanApi.get('/health', (peticion, respuesta) => {
+  respuesta.json({
+    estado: 'operativo',
+    mensaje: 'Servidor del GAD Paján está en línea'
+  });
 });
 
-// Test database connection
-app.get('/api/test-db', async (req, res) => {
+/**
+ * Validación técnica de la conexión con la base de datos institucional.
+ */
+pajanApi.get('/api/test-db', async (peticion, respuesta) => {
   try {
-    await prisma.$connect();
-    const userCount = await prisma.user.count();
-    res.json({
-      status: 'ok',
-      message: 'Database connected successfully',
-      userCount
+    await pajanDb.$connect();
+    const totalUsuarios = await pajanDb.user.count();
+    respuesta.json({
+      estado: 'exitoso',
+      mensaje: 'Conexión con la base de datos establecida correctamente',
+      conteoUsuarios: totalUsuarios
     });
-  } catch (error: any) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Database connection failed',
-      error: error.message
+  } catch (errorTecnico: any) {
+    respuesta.status(500).json({
+      estado: 'error',
+      mensaje: 'Fallo en la comunicación con la base de datos',
+      detalle: errorTecnico.message
     });
   }
 });
 
-// Routes
+// Enrutamiento de Módulos del Sistema
 import authRoutes from './routes/auth.js';
 import incidentRoutes from './routes/incidents.js';
 import profileRoutes from './routes/profiles.js';
@@ -53,33 +63,38 @@ import uploadRoutes from './routes/upload.js';
 import statsRoutes from './routes/stats.js';
 import barrioPresidentRoutes from './routes/barrioPresidents.js';
 
-app.use('/api/auth', authRoutes);
-app.use('/api/incidents', incidentRoutes);
-app.use('/api/profiles', profileRoutes);
-app.use('/api/departments', departmentRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/stats', statsRoutes);
-app.use('/api/barrio-presidents', barrioPresidentRoutes);
+pajanApi.use('/api/auth', authRoutes);
+pajanApi.use('/api/incidents', incidentRoutes);
+pajanApi.use('/api/profiles', profileRoutes);
+pajanApi.use('/api/departments', departmentRoutes);
+pajanApi.use('/api/categories', categoryRoutes);
+pajanApi.use('/api/upload', uploadRoutes);
+pajanApi.use('/api/stats', statsRoutes);
+pajanApi.use('/api/barrio-presidents', barrioPresidentRoutes);
 
-// Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
+/**
+ * Manejador centralizado de excepciones y errores operativos.
+ */
+pajanApi.use((error: any, peticion: express.Request, respuesta: express.Response, siguiente: express.NextFunction) => {
+  console.error('Excepción detectada:', error);
+  respuesta.status(error.status || 500).json({
+    error: error.message || 'Error interno en el servidor del GAD',
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔌 Database test: http://localhost:${PORT}/api/test-db`);
+// Activación del Servicio
+pajanApi.listen(PUERTO_SERVICIO, () => {
+  console.log(`🚀 Sistema operativo en: http://localhost:${PUERTO_SERVICIO}`);
+  console.log(`📊 Monitoreo: http://localhost:${PUERTO_SERVICIO}/health`);
+  console.log(`🔌 Prueba DB: http://localhost:${PUERTO_SERVICIO}/api/test-db`);
 });
 
-// Graceful shutdown
+/**
+ * Cierre controlado de conexiones al finalizar el proceso.
+ */
 process.on('SIGTERM', async () => {
-  await prisma.$disconnect();
+  await pajanDb.$disconnect();
   process.exit(0);
 });
+
 

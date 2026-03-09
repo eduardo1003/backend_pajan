@@ -2,13 +2,17 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
-const router = express.Router();
-const prisma = new PrismaClient();
+const dptosPajanRouter = express.Router();
+const pajanPrismaInstancia = new PrismaClient();
 
-// Get all departments
-router.get('/', async (req, res) => {
+/**
+ * GESTIÓN DE UNIDADES DEPARTAMENTALES DEL GAD MUNICIPAL DE PAJÁN
+ */
+
+// Listar todas las áreas municipales operativas
+const listarUnidadesMunicipales = async (solicitud: express.Request, respuesta: express.Response) => {
   try {
-    const departments = await prisma.department.findMany({
+    const listado = await pajanPrismaInstancia.department.findMany({
       where: { isActive: true },
       include: {
         _count: {
@@ -21,19 +25,19 @@ router.get('/', async (req, res) => {
       orderBy: { name: 'asc' },
     });
 
-    res.json(departments);
-  } catch (error: any) {
-    console.error('Get departments error:', error);
-    res.status(500).json({ error: error.message || 'Failed to get departments' });
+    respuesta.json(listado);
+  } catch (fallo: any) {
+    console.error('Error al listar departamentos:', fallo);
+    respuesta.status(500).json({ error: 'Error al recuperar la estructura departamental' });
   }
-});
+};
 
-// Get single department
-router.get('/:id', async (req, res) => {
+// Ver composición de una unidad específica
+const verComposicionUnidad = async (solicitud: express.Request, respuesta: express.Response) => {
   try {
-    const { id } = req.params;
+    const { id } = solicitud.params;
 
-    const department = await prisma.department.findUnique({
+    const areaEncontrada = await pajanPrismaInstancia.department.findUnique({
       where: { id },
       include: {
         profiles: {
@@ -46,27 +50,27 @@ router.get('/:id', async (req, res) => {
       },
     });
 
-    if (!department) {
-      return res.status(404).json({ error: 'Department not found' });
+    if (!areaEncontrada) {
+      return respuesta.status(404).json({ error: 'La unidad departamental no existe' });
     }
 
-    res.json(department);
-  } catch (error: any) {
-    console.error('Get department error:', error);
-    res.status(500).json({ error: error.message || 'Failed to get department' });
+    respuesta.json(areaEncontrada);
+  } catch (fallo: any) {
+    console.error('Error de consulta dpto:', fallo);
+    respuesta.status(500).json({ error: 'Fallo en la comunicación con el servidor' });
   }
-});
+};
 
-// Create department (admin only)
-router.post('/', authenticateToken, requireRole('admin'), async (req, res) => {
+// Crear nueva unidad administrativa (Solo Administración Central)
+const crearUnidadAdministrativa = async (solicitud: express.Request, respuesta: express.Response) => {
   try {
-    const { name, description, headId } = req.body;
+    const { name, description, headId } = solicitud.body;
 
     if (!name) {
-      return res.status(400).json({ error: 'Name is required' });
+      return respuesta.status(400).json({ error: 'Debe asignar un nombre al departamento' });
     }
 
-    const department = await prisma.department.create({
+    const nuevaUnidad = await pajanPrismaInstancia.department.create({
       data: {
         name,
         description,
@@ -74,51 +78,60 @@ router.post('/', authenticateToken, requireRole('admin'), async (req, res) => {
       },
     });
 
-    res.status(201).json(department);
-  } catch (error: any) {
-    console.error('Create department error:', error);
-    res.status(500).json({ error: error.message || 'Failed to create department' });
+    respuesta.status(201).json(nuevaUnidad);
+  } catch (fallo: any) {
+    console.error('Error en alta de dpto:', fallo);
+    respuesta.status(500).json({ error: 'No se pudo formalizar el registro de la unidad' });
   }
-});
+};
 
-// Update department (admin only)
-router.put('/:id', authenticateToken, requireRole('admin'), async (req, res) => {
+// Actualizar parámetros de una unidad
+const actualizarUnidadPajan = async (solicitud: express.Request, respuesta: express.Response) => {
   try {
-    const { id } = req.params;
-    const { name, description, headId, isActive } = req.body;
+    const { id } = solicitud.params;
+    const { name, description, headId, isActive } = solicitud.body;
 
-    const department = await prisma.department.update({
+    const unidadActualizada = await pajanPrismaInstancia.department.update({
       where: { id },
       data: {
-        name: name || undefined,
-        description: description || undefined,
-        headId: headId || undefined,
-        isActive: isActive !== undefined ? isActive : undefined,
+        name: name ?? undefined,
+        description: description ?? undefined,
+        headId: headId ?? undefined,
+        isActive: isActive ?? undefined,
       },
     });
 
-    res.json(department);
-  } catch (error: any) {
-    console.error('Update department error:', error);
-    res.status(500).json({ error: error.message || 'Failed to update department' });
+    respuesta.json(unidadActualizada);
+  } catch (fallo: any) {
+    console.error('Error en actualización dpto:', fallo);
+    respuesta.status(500).json({ error: 'Hubo un error al guardar los cambios' });
   }
-});
+};
 
-// Delete department (admin only)
-router.delete('/:id', authenticateToken, requireRole('admin'), async (req, res) => {
+// Baja de unidad del sistema
+const removerUnidadMunicipal = async (solicitud: express.Request, respuesta: express.Response) => {
   try {
-    const { id } = req.params;
+    const { id } = solicitud.params;
 
-    await prisma.department.delete({
+    await pajanPrismaInstancia.department.delete({
       where: { id },
     });
 
-    res.json({ message: 'Department deleted successfully' });
-  } catch (error: any) {
-    console.error('Delete department error:', error);
-    res.status(500).json({ error: error.message || 'Failed to delete department' });
+    respuesta.json({ mensaje: 'Unidad departamental removida satisfactoriamente' });
+  } catch (fallo: any) {
+    console.error('Error al remover dpto:', fallo);
+    respuesta.status(500).json({ error: 'La eliminación fue denegada por integridad de datos' });
   }
-});
+};
 
-export default router;
+/**
+ * RUTAS DE ACCESO AL MÓDULO
+ */
+dptosPajanRouter.get('/', listarUnidadesMunicipales);
+dptosPajanRouter.get('/:id', verComposicionUnidad);
+dptosPajanRouter.post('/', authenticateToken, requireRole('admin'), crearUnidadAdministrativa);
+dptosPajanRouter.put('/:id', authenticateToken, requireRole('admin'), actualizarUnidadPajan);
+dptosPajanRouter.delete('/:id', authenticateToken, requireRole('admin'), removerUnidadMunicipal);
+
+export default dptosPajanRouter;
 

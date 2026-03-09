@@ -2,54 +2,56 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
-const router = express.Router();
-const prisma = new PrismaClient();
+const apiCategoriasRouter = express.Router();
+const pajanPrisma = new PrismaClient();
 
-// Get all categories
-router.get('/', async (req, res) => {
+/**
+ * MÓDULO DE GESTIÓN DE CATEGORÍAS CIUDADANAS - GAD PAJÁN
+ */
+
+// Recuperar catálogo de categorías vigentes
+const obtenerCategoriasActivas = async (peticion: express.Request, respuesta: express.Response) => {
   try {
-    const categories = await prisma.category.findMany({
+    const catalogo = await pajanPrisma.category.findMany({
       where: { isActive: true },
       orderBy: { name: 'asc' },
     });
-
-    res.json(categories);
-  } catch (error: any) {
-    console.error('Get categories error:', error);
-    res.status(500).json({ error: error.message || 'Failed to get categories' });
+    respuesta.json(catalogo);
+  } catch (excepcion: any) {
+    console.error('Error al recuperar categorías:', excepcion);
+    respuesta.status(500).json({ error: 'No se pudo cargar el catálogo de categorías' });
   }
-});
+};
 
-// Get single category
-router.get('/:id', async (req, res) => {
+// Detalle de una categoría específica
+const detalleCategoria = async (peticion: express.Request, respuesta: express.Response) => {
   try {
-    const { id } = req.params;
-
-    const category = await prisma.category.findUnique({
+    const { id } = peticion.params;
+    const registro = await pajanPrisma.category.findUnique({
       where: { id },
     });
 
-    if (!category) {
-      return res.status(404).json({ error: 'Category not found' });
+    if (!registro) {
+      return respuesta.status(404).json({ error: 'La categoría solicitada no existe' });
     }
 
-    res.json(category);
-  } catch (error: any) {
-    console.error('Get category error:', error);
-    res.status(500).json({ error: error.message || 'Failed to get category' });
+    respuesta.json(registro);
+  } catch (excepcion: any) {
+    console.error('Error en consulta de categoría:', excepcion);
+    respuesta.status(500).json({ error: 'Fallo en la comunicación con el repositorio' });
   }
-});
+};
 
-// Create category (admin only)
-router.post('/', authenticateToken, requireRole('admin'), async (req, res) => {
+// Registro de nueva categoría (Directivo solamente)
+const crearNuevaCategoria = async (peticion: express.Request, respuesta: express.Response) => {
   try {
-    const { name, description, icon, color } = req.body;
+    const { name, description, icon, color } = peticion.body;
 
     if (!name) {
-      return res.status(400).json({ error: 'Name is required' });
+      return respuesta.status(400).json({ error: 'Se requiere un nombre para la categoría' });
     }
 
-    const category = await prisma.category.create({
+    const nuevaCatego = await pajanPrisma.category.create({
       data: {
         name,
         description,
@@ -58,52 +60,61 @@ router.post('/', authenticateToken, requireRole('admin'), async (req, res) => {
       },
     });
 
-    res.status(201).json(category);
-  } catch (error: any) {
-    console.error('Create category error:', error);
-    res.status(500).json({ error: error.message || 'Failed to create category' });
+    respuesta.status(201).json(nuevaCatego);
+  } catch (excepcion: any) {
+    console.error('Error en creación de categoría:', excepcion);
+    respuesta.status(500).json({ error: 'Error al intentar registrar la categoría' });
   }
-});
+};
 
-// Update category (admin only)
-router.put('/:id', authenticateToken, requireRole('admin'), async (req, res) => {
+// Edición de parámetros de categoría
+const modificarCategoria = async (peticion: express.Request, respuesta: express.Response) => {
   try {
-    const { id } = req.params;
-    const { name, description, icon, color, isActive } = req.body;
+    const { id } = peticion.params;
+    const { name, description, icon, color, isActive } = peticion.body;
 
-    const category = await prisma.category.update({
+    const actualizacion = await pajanPrisma.category.update({
       where: { id },
       data: {
-        name: name || undefined,
-        description: description || undefined,
-        icon: icon || undefined,
-        color: color || undefined,
-        isActive: isActive !== undefined ? isActive : undefined,
+        name: name ?? undefined,
+        description: description ?? undefined,
+        icon: icon ?? undefined,
+        color: color ?? undefined,
+        isActive: isActive ?? undefined,
       },
     });
 
-    res.json(category);
-  } catch (error: any) {
-    console.error('Update category error:', error);
-    res.status(500).json({ error: error.message || 'Failed to update category' });
+    respuesta.json(actualizacion);
+  } catch (excepcion: any) {
+    console.error('Error al actualizar categoría:', excepcion);
+    respuesta.status(500).json({ error: 'No se pudo procesar la modificación' });
   }
-});
+};
 
-// Delete category (admin only)
-router.delete('/:id', authenticateToken, requireRole('admin'), async (req, res) => {
+// Remoción de categoría del sistema
+const eliminarCategoriaPermanente = async (peticion: express.Request, respuesta: express.Response) => {
   try {
-    const { id } = req.params;
+    const { id } = peticion.params;
 
-    await prisma.category.delete({
+    await pajanPrisma.category.delete({
       where: { id },
     });
 
-    res.json({ message: 'Category deleted successfully' });
-  } catch (error: any) {
-    console.error('Delete category error:', error);
-    res.status(500).json({ error: error.message || 'Failed to delete category' });
+    respuesta.json({ mensaje: 'Categoría eliminada del registro institucional' });
+  } catch (excepcion: any) {
+    console.error('Error al eliminar categoría:', excepcion);
+    respuesta.status(500).json({ error: 'No se permite la eliminación de esta categoría' });
   }
-});
+};
 
-export default router;
+/**
+ * DEFINICIÓN DE ENDPOINTS
+ */
+apiCategoriasRouter.get('/', obtenerCategoriasActivas);
+apiCategoriasRouter.get('/:id', detalleCategoria);
+apiCategoriasRouter.post('/', authenticateToken, requireRole('admin'), crearNuevaCategoria);
+apiCategoriasRouter.put('/:id', authenticateToken, requireRole('admin'), modificarCategoria);
+apiCategoriasRouter.delete('/:id', authenticateToken, requireRole('admin'), eliminarCategoriaPermanente);
+
+export default apiCategoriasRouter;
 
